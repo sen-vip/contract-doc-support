@@ -18,7 +18,7 @@
         <h1>계약서류 작성지원</h1>
         <p>업체 제출용 계약서류를 한 번에 작성·출력</p>
       </div>
-      <span class="audience-badge">업체용</span><span class="version">v0.1.6</span>
+      <span class="audience-badge">업체용</span><span class="version">v0.1.7</span>
     </div>
     <div class="top-actions">
       <button class="btn ghost" id="helpBtn">도움말</button>
@@ -41,8 +41,8 @@
           <label>계약 종류</label>
           <div class="segmented" id="contractTypeGroup" role="radiogroup" aria-label="계약 종류">
             <button type="button" data-type="goods">물품</button>
-            <button type="button" data-type="service">용역</button>
-            <button type="button" data-type="construction" class="active">공사</button>
+            <button type="button" data-type="service" class="active">용역</button>
+            <button type="button" data-type="construction">공사</button>
           </div>
         </div>
 
@@ -136,7 +136,7 @@
           <div class="doc-select"><input type="checkbox" id="selectPledge" checked /><label for="selectPledge">출력 선택</label></div>
           <div class="doc-icon">02</div>
           <div class="doc-title-row"><h3>수의계약 통합서약서</h3><span class="pill blue">추천</span></div>
-          <p>사업자 유형에 따라 체결 제한 확인값을 도와드립니다.</p>
+          <p>사업자 유형에 맞춰 확인항목을 안내합니다.</p>
           <div class="status-line" id="pledgeStatus"><span class="dot warn"></span>확인할 항목이 있습니다</div>
           <div class="card-actions"><button class="btn subtle open-editor" data-target="pledgeEditor">작성</button><button class="btn ghost preview-one" data-doc="pledge">미리보기</button></div>
         </article>
@@ -145,7 +145,7 @@
           <div class="doc-select"><input type="checkbox" id="selectSafety" checked /><label for="selectSafety">출력 선택</label></div>
           <div class="doc-icon">03</div>
           <div class="doc-title-row"><h3>안전·보건 체크리스트</h3><span class="pill blue" id="safetyRecommendPill">추천</span></div>
-          <p>원클릭 공통 체크리스트 10개 항목 + 재해예방 체크리스트 여부</p>
+          <p>공사·용역 작업 전 안전·보건 확인</p>
           <div class="status-line" id="safetyStatus"><span class="dot muted"></span>미작성</div>
           <div class="card-actions"><button class="btn subtle open-editor" data-target="safetyEditor">작성</button><button class="btn ghost preview-one" data-doc="safety">미리보기</button></div>
         </article>

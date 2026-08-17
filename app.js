@@ -5,7 +5,7 @@
   const STORE_KEY = 'contractDocFit.vendor.v1';
 
   const state = {
-    contractType:'construction', businessType:'individual', customRate:false,
+    contractType:'service', businessType:'individual', customRate:false,
     pledge:{}, conflict:Array(8).fill(null), safety:Array(10).fill(null), hazard:Array(4).fill(null), hazardAnswers:[],
     signatures:{representative:null, inspector:null, contractor:null}, sealObjectUrl:null,
     activeSignSlot:null, previewDocs:[], pendingAfterSign:null
@@ -150,7 +150,12 @@
     $('#defectWarning').style.display=type==='goods'?'none':'flex';
     if(!state.customRate) $('#delayRateDisplay').textContent=rates[type];
     $('#delayRateInfo').textContent=`${typeNames[type]} 지연배상금률 기본값은 ${rates[type]}로 설정됩니다.`;
-    if(type!=='construction') state.pledge.utility='na';
+    if(type==='construction') {
+      // 공사에서는 전기·수도 사용료 납부 확인을 업체가 직접 판단해야 하므로 기본값을 두지 않습니다.
+      if(state.pledge.utility==='na') delete state.pledge.utility;
+    } else {
+      state.pledge.utility='na';
+    }
     const pill=$('#safetyRecommendPill'); pill.textContent=type==='goods'?'선택':'추천'; pill.className='pill '+(type==='goods'?'gray':'blue');
     $('#safetyCard').classList.toggle('recommended',type!=='goods');
     // 계약종류별 업체 제출 기본 서류 세트
@@ -250,7 +255,7 @@
     ['institution','recipient','contractName','contractDate','startDate','endDate','contractorManager','representativeBirth'].forEach(id=>{const el=$('#'+id);if(el)el.value='';});
     $('#recipient').dataset.userEdited=''; $('#defectPeriod').value='1';$('#customDefect').value='';$('#customDefect').classList.add('hidden');$('#defectConfirmed').checked=false;
     state.customRate=false;$('#customRate').classList.add('hidden');$('#toggleRateEdit').textContent='직접 설정';
-    state.pledge={}; state.conflict=Array(8).fill(null); state.safety=Array(10).fill(null);state.hazard=Array(4).fill(null);state.hazardAnswers=hazardForms.map(f=>Array(f.questions.length).fill(null)); clearSignatures(); setContractType('construction'); setBusinessType(state.businessType); renderPledgeSimple();renderConflict();renderSafety();updateSummaries();updatePledgeStatus();updateSafetyStatus();updateConsentUI(); toast('새 계약을 시작했습니다. 저장된 업체정보는 유지됩니다.');
+    state.pledge={}; state.conflict=Array(8).fill(null); state.safety=Array(10).fill(null);state.hazard=Array(4).fill(null);state.hazardAnswers=hazardForms.map(f=>Array(f.questions.length).fill(null)); clearSignatures(); setContractType('service'); setBusinessType(state.businessType); renderPledgeSimple();renderConflict();renderSafety();updateSummaries();updatePledgeStatus();updateSafetyStatus();updateConsentUI(); toast('새 계약을 시작했습니다. 저장된 업체정보는 유지됩니다.');
   }
 
   function choiceLabel(v,labels={yes:'예',no:'아니오',na:'해당없음'}){return v?labels[v]||v:'';}
@@ -423,5 +428,5 @@
   window.addEventListener('afterprint',()=>{state.signatures.contractor=null;$('#printRoot').innerHTML='';if($('#previewDialog').open&&state.previewDocs.includes('safety'))$('#previewCanvas').innerHTML=state.previewDocs.map(docHTML).join('');});
   ['contractName','contractDate','startDate','endDate'].forEach(id=>$('#'+id).addEventListener('input',updateSummaries));
 
-  setupSignaturePad(); loadVendor(); setContractType('construction'); setBusinessType(state.businessType); renderPledgeSimple();renderConflict();renderSafety();updateSummaries();updatePledgeStatus();updateSafetyStatus();updateSignaturePreviews();updateConsentUI();
+  setupSignaturePad(); loadVendor(); setContractType('service'); setBusinessType(state.businessType); renderPledgeSimple();renderConflict();renderSafety();updateSummaries();updatePledgeStatus();updateSafetyStatus();updateSignaturePreviews();updateConsentUI();
 })();

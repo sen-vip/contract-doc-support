@@ -120,3 +120,33 @@ label{font-size:14px}.field small{font-size:12px}.brand-wrap h1{font-size:19px}.
 .hazard-detail-print{padding:10mm 9mm 8mm;font-size:8.8pt;line-height:1.25}.hazard-detail-print h1{font-size:17pt;letter-spacing:0;margin:0 0 1.3mm}.hazard-detail-subtitle{text-align:center;font-size:8.7pt;margin-bottom:4mm}.hazard-detail-meta{display:grid;gap:1.5mm;margin-bottom:3mm}.hazard-detail-meta>div{display:flex;align-items:center;gap:3mm;min-height:6mm}.hazard-detail-meta strong{width:31mm}.hazard-detail-sign{display:inline-flex;width:24mm;height:10mm;align-items:center;justify-content:center}.hazard-detail-sign img{max-width:23mm;max-height:9mm}.hazard-detail-table th,.hazard-detail-table td{padding:1.15mm 1.35mm}.hazard-detail-table td.check-content{font-size:8.7pt;line-height:1.25}.hazard-detail-print-note{margin-top:2mm;font-size:8.4pt;line-height:1.35}
 
 @media(max-width:820px){.hazard-head,.hazard-detail-head{flex-direction:column}.hazard-head .btn,.hazard-detail-head .btn{width:100%}.hazard-question-row{grid-template-columns:30px 1fr}.hazard-question-row .choice-set{grid-column:2;justify-content:flex-start}}
+
+
+/* v0.1.7 - service-first defaults, balanced 2x2 document grid, print refinements */
+.doc-cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.doc-card{min-height:196px}
+.doc-card>p{min-height:32px}
+
+/* Acceptance editor: keep the three controls on one visual baseline. */
+.form-row-three{grid-template-columns:1fr 1fr 1.2fr;align-items:start}
+.form-row-three>.field{gap:7px;justify-content:flex-start}
+.form-row-three>.field>label{height:22px;display:flex;align-items:center}
+.form-row-three .locked-input,
+.form-row-three select,
+.form-row-three .confirm-chip{height:58px;min-height:58px}
+.form-row-three .locked-input{padding:0 14px}
+.form-row-three select{padding-top:0;padding-bottom:0}
+.form-row-three .confirm-chip{padding:0 14px}
+.check-field{justify-content:flex-start}
+
+/* Appendix notes: no gray shaded strips; keep notes readable but document-like. */
+.appendix-note{margin-top:1.4mm;padding:0;background:transparent;border-left:0;color:#5a6472;font-size:8.5pt;line-height:1.5}
+
+/* Safety print: move the whole composition down slightly to balance top/bottom white space. */
+.safety-print{padding:11mm 8mm 4.5mm;font-size:9pt;line-height:1.2;min-height:297mm}
+.safety-print h1{margin:0 0 1.2mm}
+.safety-subtitle{margin-bottom:2.8mm}
+
+@media(max-width:1100px){
+  .doc-cards{grid-template-columns:1fr}
+}
