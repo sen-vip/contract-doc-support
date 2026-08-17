@@ -397,3 +397,61 @@ input.invalid{border-color:#d76d6d!important;background:#fffafa!important}
   padding:0;
   line-height:18px;
 }
+
+
+/* v0.2.6 — hazard applicability table: fixed grid and pixel-aligned O/X column */
+.hazard-print{
+  width:100%;
+  border-collapse:collapse;
+  table-layout:fixed;
+  margin-top:-1px;
+}
+.hazard-print col.hazard-name-col{width:auto}
+.hazard-print col.hazard-check-col{width:22mm}
+.hazard-print th,
+.hazard-print td{
+  border:1px solid #333;
+  box-sizing:border-box;
+  vertical-align:middle;
+}
+.hazard-print th{
+  padding:.8mm 1.4mm;
+  background:#f3f3f3;
+  font-weight:700;
+  text-align:center;
+  line-height:1.15;
+}
+.hazard-print th:first-child{text-align:left}
+.hazard-check-head{
+  display:flex;
+  min-height:7.2mm;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:.25mm;
+  white-space:nowrap;
+}
+.hazard-check-head>span{font-size:.92em;font-weight:600}
+.hazard-print tbody tr:not(.hazard-note-row){height:6.4mm}
+.hazard-print tbody tr:not(.hazard-note-row)>td{
+  padding:.75mm 1.4mm;
+  line-height:1.15;
+}
+.hazard-print tbody tr:not(.hazard-note-row)>td:first-child{
+  text-align:left;
+  white-space:nowrap;
+}
+.hazard-print tbody tr:not(.hazard-note-row)>td:last-child{
+  width:22mm;
+  padding:0;
+  text-align:center;
+  vertical-align:middle;
+  font-family:Arial,"Malgun Gothic",sans-serif;
+  font-size:10pt;
+  line-height:1;
+}
+.hazard-note-row td{
+  padding:.8mm 1.4mm;
+  text-align:center;
+  line-height:1.22;
+}
