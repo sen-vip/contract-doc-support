@@ -341,3 +341,59 @@ input.invalid{border-color:#d76d6d!important;background:#fffafa!important}
   .v023-preview-pane{position:relative;top:auto;height:auto;overflow:visible}
   .v023-preview-pane .shared-preview-shell{height:auto;display:block}
 }
+
+
+/* v0.2.5 — quick actions are neutral; selected blue is reserved for actual choices */
+.quick-bar .btn.tiny,
+.flat-group-tools .btn.tiny,
+.hazard-head .btn.tiny,
+.hazard-detail-head .btn.tiny{
+  background:#fff;
+  border-color:var(--line);
+  color:#4f5f74;
+  box-shadow:none;
+}
+.quick-bar .btn.tiny:hover,
+.flat-group-tools .btn.tiny:hover,
+.hazard-head .btn.tiny:hover,
+.hazard-detail-head .btn.tiny:hover{
+  background:#f7faff;
+  border-color:#c9d7e8;
+  color:#315d91;
+}
+.quick-bar .btn.tiny:active,
+.flat-group-tools .btn.tiny:active,
+.hazard-head .btn.tiny:active,
+.hazard-detail-head .btn.tiny:active{
+  background:#eef4fc;
+  transform:translateY(0);
+}
+
+/* Acceptance: pixel-aligned confirmation row */
+.v023-doc-section[data-doc="acceptance"] .confirm-chip{
+  display:grid;
+  grid-template-columns:16px minmax(0,1fr);
+  align-items:center;
+  justify-content:start;
+  column-gap:9px;
+  padding:0 14px;
+  line-height:1;
+}
+.v023-doc-section[data-doc="acceptance"] .confirm-chip input[type="checkbox"]{
+  width:16px;
+  height:16px;
+  min-width:16px;
+  margin:0;
+  padding:0;
+  align-self:center;
+  justify-self:start;
+  vertical-align:middle;
+}
+.v023-doc-section[data-doc="acceptance"] .confirm-chip span{
+  display:flex;
+  align-items:center;
+  min-height:18px;
+  margin:0;
+  padding:0;
+  line-height:18px;
+}
