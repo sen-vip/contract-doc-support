@@ -18,7 +18,7 @@
         <h1>계약서류 작성지원</h1>
         <p>업체 제출용 계약서류를 한 번에 작성·출력</p>
       </div>
-      <span class="audience-badge">업체용</span><span class="version">v0.1.7</span>
+      <span class="audience-badge">업체용</span><span class="version">v0.2.4</span>
     </div>
     <div class="top-actions">
       <button class="btn ghost" id="helpBtn">도움말</button>
@@ -32,130 +32,87 @@
         <div class="panel-head">
           <div>
             <p class="eyebrow">공통 입력</p>
-            <h2>계약 기본정보</h2>
+            <h2>공통정보</h2>
           </div>
           <span class="save-state" id="saveState">업체정보 미저장</span>
         </div>
 
-        <div class="field-group">
-          <label>계약 종류</label>
-          <div class="segmented" id="contractTypeGroup" role="radiogroup" aria-label="계약 종류">
-            <button type="button" data-type="goods">물품</button>
-            <button type="button" data-type="service" class="active">용역</button>
-            <button type="button" data-type="construction">공사</button>
+        <details class="common-section" id="contractInfoSection" open>
+          <summary><span><strong>계약정보</strong><small id="contractCompactSummary">용역 · 미입력</small></span><span class="summary-chevron">⌄</span></summary>
+          <div class="common-section-body">
+            <div class="field-group first-field">
+              <label>계약 종류</label>
+              <div class="segmented" id="contractTypeGroup" role="radiogroup" aria-label="계약 종류">
+                <button type="button" data-type="goods">물품</button>
+                <button type="button" data-type="service" class="active">용역</button>
+                <button type="button" data-type="construction">공사</button>
+              </div>
+            </div>
+            <div class="field-grid one compact-fields">
+              <div class="field"><label for="institution">발주기관명</label><input id="institution" placeholder="예: 학돌중학교" autocomplete="organization" /></div>
+              <div class="field"><div class="label-row"><label for="recipient">수신인</label><button class="text-btn" id="suggestRecipientBtn" type="button">다시 추천</button></div><input id="recipient" placeholder="예: 학돌중학교장 귀하" /><small id="recipientHint">학교·교육청·교육지원청은 입력값에 따라 추천합니다.</small></div>
+              <div class="field"><label for="contractName">계약명 <span class="optional">선택</span></label><input id="contractName" placeholder="비워두고 출력할 수 있습니다" /></div>
+            </div>
+            <div class="field-grid two compact-fields date-grid">
+              <div class="field"><label for="contractDate">계약일</label><div class="date-control"><input id="contractDate" class="date-text" type="text" inputmode="numeric" maxlength="10" placeholder="YYYY-MM-DD" autocomplete="off" /><button type="button" class="calendar-btn" data-date-for="contractDate" aria-label="계약일 달력 열기">▦</button><input class="native-date-picker" type="date" data-picker-for="contractDate" tabindex="-1" aria-hidden="true" /></div></div>
+              <div class="field"><label for="startDate" id="startDateLabel">착수일</label><div class="date-control"><input id="startDate" class="date-text" type="text" inputmode="numeric" maxlength="10" placeholder="YYYY-MM-DD" autocomplete="off" /><button type="button" class="calendar-btn" data-date-for="startDate" aria-label="착수일 달력 열기">▦</button><input class="native-date-picker" type="date" data-picker-for="startDate" tabindex="-1" aria-hidden="true" /></div></div>
+              <div class="field full"><label for="endDate" id="endDateLabel">완료기한</label><div class="date-control"><input id="endDate" class="date-text" type="text" inputmode="numeric" maxlength="10" placeholder="YYYY-MM-DD" autocomplete="off" /><button type="button" class="calendar-btn" data-date-for="endDate" aria-label="완료기한 달력 열기">▦</button><input class="native-date-picker" type="date" data-picker-for="endDate" tabindex="-1" aria-hidden="true" /></div></div>
+            </div>
           </div>
-        </div>
+        </details>
 
-        <div class="field-grid one">
-          <div class="field">
-            <label for="institution">발주기관명</label>
-            <input id="institution" placeholder="예: 학돌중학교" autocomplete="organization" />
+        <details class="common-section" id="vendorInfoSection" open>
+          <summary><span><strong>업체정보</strong><small id="vendorCompactSummary">미입력</small></span><span class="summary-chevron">⌄</span></summary>
+          <div class="common-section-body">
+            <div class="field-group first-field"><label>사업자 유형</label><div class="segmented compact" id="businessTypeGroup" role="radiogroup" aria-label="사업자 유형"><button type="button" data-business="individual" class="active">개인사업자</button><button type="button" data-business="corporate">법인사업자</button></div></div>
+            <div class="field-grid one compact-fields">
+              <div class="field"><label for="vendorName">업체명</label><input id="vendorName" placeholder="상호 또는 법인명" /></div>
+              <div class="field"><label for="representative">대표자</label><input id="representative" placeholder="성명" /></div>
+              <div class="field"><label for="businessNo">사업자등록번호</label><input id="businessNo" inputmode="numeric" placeholder="000-00-00000" /></div>
+              <div class="field"><label for="phone">연락처</label><input id="phone" inputmode="tel" placeholder="02-0000-0000" /></div>
+              <div class="field"><label for="address">주소</label><input id="address" placeholder="사업장 주소" /></div>
+            </div>
+            <label class="save-option"><input type="checkbox" id="rememberVendor" /><span><strong>이 브라우저에 업체정보 저장</strong><small>직인·서명·계약정보는 저장하지 않습니다.</small></span></label>
+            <button class="btn subtle full-btn" id="deleteSavedVendorBtn" type="button">저장정보 삭제</button>
           </div>
-          <div class="field">
-            <div class="label-row"><label for="recipient">수신인</label><button class="text-btn" id="suggestRecipientBtn" type="button">다시 추천</button></div>
-            <input id="recipient" placeholder="예: 학돌중학교장 귀하" />
-            <small id="recipientHint">학교·교육청·교육지원청은 입력값에 따라 추천합니다.</small>
-          </div>
-          <div class="field">
-            <label for="contractName">계약명 <span class="optional">선택</span></label>
-            <input id="contractName" placeholder="비워두고 출력할 수 있습니다" />
-          </div>
-        </div>
-
-        <div class="divider"></div>
-
-        <div class="field-grid two">
-          <div class="field">
-            <label for="contractDate">계약일</label>
-            <input id="contractDate" type="date" />
-          </div>
-          <div class="field">
-            <label for="startDate" id="startDateLabel">착공일</label>
-            <input id="startDate" type="date" />
-          </div>
-          <div class="field full">
-            <label for="endDate" id="endDateLabel">준공기한</label>
-            <input id="endDate" type="date" />
-          </div>
-        </div>
-
-        <div class="divider"></div>
-
-        <div class="panel-subhead">
-          <div>
-            <p class="eyebrow">반복 입력 절약</p>
-            <h3>업체정보</h3>
-          </div>
-        </div>
-
-        <div class="field-group">
-          <label>사업자 유형</label>
-          <div class="segmented compact" id="businessTypeGroup" role="radiogroup" aria-label="사업자 유형">
-            <button type="button" data-business="individual" class="active">개인사업자</button>
-            <button type="button" data-business="corporate">법인사업자</button>
-          </div>
-        </div>
-
-        <div class="field-grid one">
-          <div class="field"><label for="vendorName">업체명</label><input id="vendorName" placeholder="상호 또는 법인명" /></div>
-          <div class="field"><label for="representative">대표자</label><input id="representative" placeholder="성명" /></div>
-          <div class="field"><label for="businessNo">사업자등록번호</label><input id="businessNo" inputmode="numeric" placeholder="000-00-00000" /></div>
-          <div class="field"><label for="phone">연락처</label><input id="phone" inputmode="tel" placeholder="02-0000-0000" /></div>
-          <div class="field"><label for="address">주소</label><input id="address" placeholder="사업장 주소" /></div>
-        </div>
-
-        <label class="save-option">
-          <input type="checkbox" id="rememberVendor" />
-          <span><strong>이 브라우저에 업체정보 저장</strong><small>직인·서명·계약정보는 저장하지 않습니다.</small></span>
-        </label>
-        <button class="btn subtle full-btn" id="deleteSavedVendorBtn" type="button">저장정보 삭제</button>
+        </details>
       </section>
     </aside>
 
     <section class="workspace">
-      <div class="hero-note">
-        <div>
-          <p class="eyebrow">작성 서류</p>
-          <h2>필요한 서류만 확인하고 출력하세요</h2>
-          <p>입력하지 않은 항목이 있어도 빈칸으로 출력할 수 있습니다.</p>
-        </div>
+      <div class="hero-note compact-hero">
+        <div><p class="eyebrow">작성 서류</p><h2>필요한 서류</h2><p>왼쪽 실제 서류를 보면서 오른쪽에서 위에서 아래로 바로 작성하세요.</p></div>
         <button class="btn dark" id="previewSelectedBtn">선택 서류 한 번에 미리보기</button>
       </div>
 
-      <div class="doc-cards">
-        <article class="doc-card recommended" data-doc="acceptance">
-          <div class="doc-select"><input type="checkbox" id="selectAcceptance" checked /><label for="selectAcceptance">출력 선택</label></div>
-          <div class="doc-icon">01</div>
-          <div class="doc-title-row"><h3>승낙사항</h3><span class="pill blue">추천</span></div>
-          <p id="acceptanceSummary">공사 · 지연배상금 0.5/1000 · 하자 1년</p>
+      <div class="doc-list" id="docList">
+        <article class="doc-list-row recommended" data-doc="acceptance">
+          <label class="doc-list-select"><input type="checkbox" id="selectAcceptance" checked /><span class="sr-only">승낙사항 출력 선택</span></label>
+          <span class="doc-list-num">01</span>
+          <div class="doc-list-copy"><div class="doc-list-title"><h3>승낙사항</h3><span class="pill blue">추천</span></div><p id="acceptanceSummary">용역 · 지연배상금 1.3/1000 · 하자 1년</p></div>
           <div class="status-line" id="acceptanceStatus"><span class="dot warn"></span>하자기간 확인 필요</div>
-          <div class="card-actions"><button class="btn subtle open-editor" data-target="acceptanceEditor">작성</button><button class="btn ghost preview-one" data-doc="acceptance">미리보기</button></div>
+          <button class="btn subtle open-editor" data-target="acceptanceEditor">작성</button>
         </article>
-
-        <article class="doc-card recommended" data-doc="pledge">
-          <div class="doc-select"><input type="checkbox" id="selectPledge" checked /><label for="selectPledge">출력 선택</label></div>
-          <div class="doc-icon">02</div>
-          <div class="doc-title-row"><h3>수의계약 통합서약서</h3><span class="pill blue">추천</span></div>
-          <p>사업자 유형에 맞춰 확인항목을 안내합니다.</p>
+        <article class="doc-list-row recommended" data-doc="pledge">
+          <label class="doc-list-select"><input type="checkbox" id="selectPledge" checked /><span class="sr-only">수의계약 통합서약서 출력 선택</span></label>
+          <span class="doc-list-num">02</span>
+          <div class="doc-list-copy"><div class="doc-list-title"><h3>수의계약 통합서약서</h3><span class="pill blue">추천</span></div><p>사업자 유형에 맞는 ‘해당없음’ 항목을 먼저 표시합니다.</p></div>
           <div class="status-line" id="pledgeStatus"><span class="dot warn"></span>확인할 항목이 있습니다</div>
-          <div class="card-actions"><button class="btn subtle open-editor" data-target="pledgeEditor">작성</button><button class="btn ghost preview-one" data-doc="pledge">미리보기</button></div>
+          <button class="btn subtle open-editor" data-target="pledgeEditor">작성</button>
         </article>
-
-        <article class="doc-card recommended" data-doc="safety" id="safetyCard">
-          <div class="doc-select"><input type="checkbox" id="selectSafety" checked /><label for="selectSafety">출력 선택</label></div>
-          <div class="doc-icon">03</div>
-          <div class="doc-title-row"><h3>안전·보건 체크리스트</h3><span class="pill blue" id="safetyRecommendPill">추천</span></div>
-          <p>공사·용역 작업 전 안전·보건 확인</p>
+        <article class="doc-list-row recommended" data-doc="safety" id="safetyCard">
+          <label class="doc-list-select"><input type="checkbox" id="selectSafety" checked /><span class="sr-only">안전·보건 체크리스트 출력 선택</span></label>
+          <span class="doc-list-num">03</span>
+          <div class="doc-list-copy"><div class="doc-list-title"><h3>안전·보건 체크리스트</h3><span class="pill blue" id="safetyRecommendPill">추천</span></div><p>공사·용역 작업 전 안전·보건 확인</p></div>
           <div class="status-line" id="safetyStatus"><span class="dot muted"></span>미작성</div>
-          <div class="card-actions"><button class="btn subtle open-editor" data-target="safetyEditor">작성</button><button class="btn ghost preview-one" data-doc="safety">미리보기</button></div>
+          <button class="btn subtle open-editor" data-target="safetyEditor">작성</button>
         </article>
-        <article class="doc-card recommended" data-doc="consent" id="consentCard">
-          <div class="doc-select"><input type="checkbox" id="selectConsent" checked /><label for="selectConsent">출력 선택</label></div>
-          <div class="doc-icon">04</div>
-          <div class="doc-title-row"><h3>행정정보 공동이용 사전동의서</h3><span class="pill blue" id="consentRecommendPill">권장</span></div>
-          <p>대금지급 전 4대보험 완납 확인용</p>
-          <div class="status-line" id="consentStatus"><span class="dot muted"></span>법인사업자 권장</div>
-          <div class="card-actions"><button class="btn subtle open-editor" data-target="consentEditor">확인</button><button class="btn ghost preview-one" data-doc="consent">미리보기</button></div>
+        <article class="doc-list-row recommended" data-doc="consent" id="consentCard">
+          <label class="doc-list-select"><input type="checkbox" id="selectConsent" checked /><span class="sr-only">행정정보 공동이용 사전동의서 출력 선택</span></label>
+          <span class="doc-list-num">04</span>
+          <div class="doc-list-copy"><div class="doc-list-title"><h3>행정정보 공동이용 사전동의서</h3><span class="pill blue" id="consentRecommendPill">권장</span></div><p>대금지급 전 4대보험 완납 확인용</p></div>
+          <div class="status-line" id="consentStatus"><span class="dot muted"></span>개인사업자 선택</div>
+          <button class="btn subtle open-editor" data-target="consentEditor">작성</button>
         </article>
       </div>
 
@@ -185,7 +142,7 @@
             </div>
           </div>
           <div class="info-banner warn" id="defectWarning"><span>확인 필요</span><p>하자담보기간은 편의를 위해 <strong>1년</strong>을 기본값으로 넣었습니다. 계약 목적물·공종·계약조건에 맞는지 반드시 확인하세요.</p></div>
-          <div class="editor-actions"><button class="btn ghost preview-one" data-doc="acceptance">미리보기</button><button class="btn dark print-one" data-doc="acceptance">바로 인쇄</button></div>
+          <div class="editor-actions"><button class="btn ghost preview-one" data-doc="acceptance">전체화면</button><button class="btn dark print-one" data-doc="acceptance">바로 인쇄</button></div>
         </div>
       </section>
 
@@ -195,20 +152,10 @@
           <button class="icon-btn collapse-btn" aria-label="접기">−</button>
         </div>
         <div class="editor-body">
-          <div class="quick-bar"><span>빠른 입력</span><button class="btn tiny" id="pledgeAllYes">서약 항목 ‘예’ 일괄</button><button class="btn tiny ghost" id="pledgeClear">선택 모두 지우기</button></div>
+          <div class="quick-bar compact-quick"><span>빠른 입력</span><button class="btn tiny" id="pledgeAllYes">서약 항목 ‘예’ 일괄</button><button class="btn tiny ghost" id="pledgeClear">선택 모두 지우기</button></div>
+          <div class="pledge-accordion" id="pledgeAccordion"></div>
 
-          <div class="pledge-list" id="pledgeSimpleList"></div>
-
-          <div class="conflict-box">
-            <div class="conflict-head">
-              <div><h3>3. 수의계약 체결 제한 여부 확인</h3><p id="conflictGuide"></p></div>
-              <button class="btn tiny" id="conflictAllNo">확인대상 모두 ‘아니오’</button>
-            </div>
-            <div class="info-banner auto"><span>자동 추천</span><p>사업자 유형만으로 구분 가능한 항목만 ‘해당없음’으로 추천합니다. 사실관계에 대한 ‘아니오’는 사용자가 직접 확인합니다.</p></div>
-            <div class="conflict-list" id="conflictList"></div>
-          </div>
-
-          <div class="editor-actions"><button class="btn ghost preview-one" data-doc="pledge">미리보기</button><button class="btn dark print-one" data-doc="pledge">바로 인쇄</button></div>
+          <div class="editor-actions"><button class="btn ghost preview-one" data-doc="pledge">전체화면</button><button class="btn dark print-one" data-doc="pledge">바로 인쇄</button></div>
         </div>
       </section>
 
@@ -232,7 +179,7 @@
             <div id="hazardList" class="hazard-list"></div>
             <div id="hazardDetailList" class="hazard-detail-list"></div>
           </div>
-          <div class="editor-actions"><button class="btn ghost preview-one" data-doc="safety">미리보기</button><button class="btn dark print-one" data-doc="safety">바로 인쇄</button></div>
+          <div class="editor-actions"><button class="btn ghost preview-one" data-doc="safety">전체화면</button><button class="btn dark print-one" data-doc="safety">바로 인쇄</button></div>
         </div>
       </section>
 
@@ -255,7 +202,7 @@
             <div><span>연락처</span><strong id="consentPhonePreview">미입력</strong></div>
           </div>
           <div class="consent-note">행정정보 공동이용이 되지 않거나 동의하지 않는 경우에는 해당 증명서를 직접 제출받아 확인합니다.</div>
-          <div class="editor-actions"><button class="btn ghost preview-one" data-doc="consent">미리보기</button><button class="btn dark print-one" data-doc="consent">바로 인쇄</button></div>
+          <div class="editor-actions"><button class="btn ghost preview-one" data-doc="consent">전체화면</button><button class="btn dark print-one" data-doc="consent">바로 인쇄</button></div>
         </div>
       </section>
 
@@ -305,8 +252,8 @@
       <div class="help-steps">
         <div><span>1</span><p><strong>계약정보 입력</strong>발주기관·계약종류·날짜를 입력합니다. 계약명과 날짜는 비워두고 수기로 작성할 수도 있습니다.</p></div>
         <div><span>2</span><p><strong>업체정보 입력</strong>개인/법인사업자를 선택하고 업체정보를 입력합니다. 원하면 이 브라우저에 업체 기본정보만 저장할 수 있습니다.</p></div>
-        <div><span>3</span><p><strong>서류 확인</strong>필요한 서류를 열어 체크값과 하자기간을 확인합니다. 사업자 유형에 따른 값은 추천일 뿐 사실관계는 직접 확인해야 합니다.</p></div>
-        <div><span>4</span><p><strong>미리보기·출력</strong>빈칸이 있어도 출력할 수 있습니다. 서명·직인은 현재 탭에서만 사용되고 영구 저장되지 않습니다.</p></div>
+        <div><span>3</span><p><strong>서류 보며 작성</strong>문서를 열면 왼쪽 입력과 오른쪽 실제 서류가 함께 보입니다. 입력값이 출력물의 어디에 들어가는지 바로 확인하세요.</p></div>
+        <div><span>4</span><p><strong>확인·출력</strong>작성 중에도 실제 서류가 계속 보입니다. 필요할 때 전체화면으로 확인하거나 바로 인쇄할 수 있습니다. 빈칸 출력도 가능합니다.</p></div>
       </div>
       <div class="help-grid">
         <article><h3>빈 양식 출력</h3><p>계약명, 날짜, 업체명, 체크값, 서명 등을 입력하지 않아도 빈칸으로 출력할 수 있습니다.</p></article>

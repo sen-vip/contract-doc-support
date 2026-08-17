@@ -8,7 +8,7 @@
     contractType:'service', businessType:'individual', customRate:false,
     pledge:{}, conflict:Array(8).fill(null), safety:Array(10).fill(null), hazard:Array(4).fill(null), hazardAnswers:[],
     signatures:{representative:null, inspector:null, contractor:null}, sealObjectUrl:null,
-    activeSignSlot:null, previewDocs:[], pendingAfterSign:null
+    activeSignSlot:null, previewDocs:[], pendingAfterSign:null, pledgeOpenGroup:'basic'
   };
 
   const rates={construction:'0.5/1000', goods:'0.8/1000', service:'1.3/1000'};
@@ -23,6 +23,16 @@
     '①부터 ⑥까지 어느 하나에 해당하는 사람이 대표자인 법인 또는 단체에 해당하는가?',
     '①부터 ⑥까지 어느 하나에 해당하는 사람과 특수한 관계의 사업자에 해당하는가?'
   ];
+  const conflictSummaries=[
+    '발주기관 소속 고위공직자·가족 등에 해당하나요?',
+    '계약 업무 담당 공직자·가족 등에 해당하나요?',
+    '감독기관 소속 고위공직자·가족 등에 해당하나요?',
+    '모회사 소속 고위공직자·가족 등에 해당하나요?',
+    '상임위원회 국회의원·가족 등에 해당하나요?',
+    '감사·조사 지방의회의원·가족 등에 해당하나요?',
+    '①~⑥ 해당자가 대표자인 법인·단체인가요?',
+    '①~⑥ 해당자와 특수관계인 사업자인가요?'
+  ];
   const safetyQuestions=[
     "학교(기관)는 과업지시서 또는 계약서에 '안전관리 및 예방조치 후 작업' 실시 내용을 포함하였습니까? (계약서가 없는 경우 본 체크리스트로 갈음)",
     '학교(기관)는 공사(용역)업체 사업주(대표자)가 안전보건교육을 실시하였는지 확인하였습니까? (고용노동부·안전보건공단 주관 사업주 교육, 1년 이내 2시간 이상 교육 이수증 확인)',
@@ -34,6 +44,18 @@
     '건설공사의 경우 학교에서의 ‘기술지도 계약’과 업체에서의 ‘산업안전보건관리비 계상’에 대한 안내를 하였습니까? (기술지도: 공사금액 1억~120억 미만, 산업안전보건관리비: 2,000만원 이상)',
     '학교(기관)에서 산업재해가 발생할 경우 해당기관(고용노동부 등)과 학교(기관)에 즉시 보고할 것을 안내하였습니까?',
     '학교(기관)는 과업 수행 중에 추가로 발견되는 유해·위험요인에 대해 학교(기관)와 예방대책에 대해 협의하도록 안내하였습니까?'
+  ];
+  const safetySummaries=[
+    '계약서·과업지시서에 안전관리 및 예방조치 내용이 있나요?',
+    '업체 사업주의 안전보건교육 이수를 확인했나요?',
+    '근로자 정기·특별 안전보건교육을 확인했나요?',
+    '안전보호구 지급·착용을 안내했나요?',
+    '현장 이동 시 기관의 안내를 받도록 안내했나요?',
+    '필요한 재해 예방 체크리스트를 제출받았나요?',
+    '유해·위험요인을 협의하고 예방대책을 수립했나요?',
+    '건설공사 기술지도·산업안전보건관리비를 안내했나요?',
+    '산업재해 발생 시 즉시 보고하도록 안내했나요?',
+    '추가 유해·위험요인 발견 시 예방대책을 협의하도록 안내했나요?'
   ];
   const hazards=['추락재해 예방 체크리스트','감전재해 예방 체크리스트','밀폐공간 질식재해예방 체크리스트','일반 산업재해 예방 체크리스트'];
   const hazardForms=[
@@ -104,22 +126,41 @@
     {id:'privacy',num:'10',title:'개인정보이용·수집 동의',text:'「개인정보 보호법」 제15조, 제22조에 따라 개인정보를 수집 및 이용하는 것에 동의합니다. 항목: 대표자명, 주소, 생년월일, (휴대)전화번호, 계좌번호, 이메일 / 수집ㆍ이용 목적: 계약업무 진행 / 보유ㆍ이용기간: 계약체결일로부터 5년',choices:['yes','no']}
   ];
 
+  const pledgeSummaries={
+    general:'계약 일반조건 준수 여부를 확인합니다.',
+    private:'수의계약 배제사유에 해당하지 않음을 확인합니다.',
+    guarantee:'계약보증금 귀속 사유 발생 시 납부 여부를 확인합니다.',
+    integrity:'청렴계약 의무 준수 여부를 확인합니다.',
+    tax:'조세포탈 등에 해당하지 않음을 확인합니다.',
+    defect:'하자보수보증금 귀속 사유 발생 시 납부 여부를 확인합니다.',
+    utility:'공사 시 학교(기관)의 전기·수도 사용료 납부 여부를 확인합니다.',
+    safety:'안전·보건 확보 의무 준수 여부를 확인합니다.',
+    privacy:'계약업무를 위한 개인정보 수집·이용 동의 여부를 확인합니다.'
+  };
+
   function val(id){return ($(id.startsWith('#')?id:'#'+id)?.value || '').trim();}
-  function fmtDate(v){ if(!v) return ''; const m=String(v).match(/^(\d{4})-(\d{2})-(\d{2})$/); if(!m) return String(v); return `${m[1]}년 ${Number(m[2])}월 ${Number(m[3])}일`; }
+  function fmtDate(v){ if(!v||!validDateInput(v)) return ''; const m=String(v).match(/^(\d{4})-(\d{2})-(\d{2})$/); return `${m[1]}년 ${Number(m[2])}월 ${Number(m[3])}일`; }
   function formatBusinessNo(v){
     const d=String(v||'').replace(/\D/g,'').slice(0,10);
     if(d.length<=3) return d;
     if(d.length<=5) return `${d.slice(0,3)}-${d.slice(3)}`;
     return `${d.slice(0,3)}-${d.slice(3,5)}-${d.slice(5)}`;
   }
-  function formatBirthInput(v){
+  function formatDateInput(v){
     const d=String(v||'').replace(/\D/g,'').slice(0,8);
     if(d.length<=4) return d;
     if(d.length<=6) return `${d.slice(0,4)}-${d.slice(4)}`;
-    return `${d.slice(0,4)}-${d.slice(4,6)}-${d.slice(6)}`;
+    return `${d.slice(0,4)}-${d.slice(4,6)}-${d.slice(6,8)}`;
   }
+  function validDateInput(v){
+    if(!v) return true;
+    const m=String(v).match(/^(\d{4})-(\d{2})-(\d{2})$/); if(!m) return false;
+    const y=+m[1],mo=+m[2],d=+m[3]; if(y<1900||y>2199||mo<1||mo>12||d<1||d>31) return false;
+    const dt=new Date(Date.UTC(y,mo-1,d)); return dt.getUTCFullYear()===y&&dt.getUTCMonth()===mo-1&&dt.getUTCDate()===d;
+  }
+  const formatBirthInput=formatDateInput;
   function printDate(v){
-    if(v) return esc(fmtDate(v));
+    if(v&&validDateInput(v)) return esc(fmtDate(v));
     return '<span class="manual-date"><span class="date-slot year"></span>년 <span class="date-slot month"></span>월 <span class="date-slot day"></span>일</span>';
   }
   function box(choice,current,label){return `<span class="boxmark">${current===choice?'☑':'☐'} ${label}</span>`;}
@@ -156,15 +197,16 @@
     } else {
       state.pledge.utility='na';
     }
-    const pill=$('#safetyRecommendPill'); pill.textContent=type==='goods'?'선택':'추천'; pill.className='pill '+(type==='goods'?'gray':'blue');
-    $('#safetyCard').classList.toggle('recommended',type!=='goods');
+    const pill=$('#safetyRecommendPill'); if(pill){pill.textContent=type==='goods'?'선택':'추천'; pill.className='pill '+(type==='goods'?'gray':'blue');}
+    const safetyCard=$('#safetyCard'); if(safetyCard)safetyCard.classList.toggle('recommended',type!=='goods');
     // 계약종류별 업체 제출 기본 서류 세트
     const acceptance=$('#selectAcceptance'), pledge=$('#selectPledge'), safety=$('#selectSafety'), consent=$('#selectConsent');
     if(acceptance) acceptance.checked=true;
     if(pledge) pledge.checked=true;
     if(safety) safety.checked=type!=='goods';
     if(consent) consent.checked=true;
-    updateSummaries(); renderPledgeSimple();
+    if($('#selectedDocCount')) updateSelectedCount();
+    updateSummaries(); renderPledgeSimple(); scheduleLivePreviews();
   }
 
   function setBusinessType(type, preserveUser=false){
@@ -173,51 +215,103 @@
       if(type==='individual'){state.conflict[6]='na';state.conflict[7]='na'; for(let i=0;i<6;i++) if(state.conflict[i]==='na') state.conflict[i]=null;}
       else {for(let i=0;i<6;i++) state.conflict[i]='na'; for(let i=6;i<8;i++) if(state.conflict[i]==='na') state.conflict[i]=null;}
     }
-    renderConflict(); updatePledgeStatus(); updateConsentUI(); saveVendorIfEnabled();
+    renderConflict(); updatePledgeStatus(); updateConsentUI(); saveVendorIfEnabled(); scheduleLivePreviews();
+  }
+
+  function groupStatus(ids){
+    const missing=ids.filter(id=>!state.pledge[id]).length;
+    if(missing===ids.length) return {text:'미작성',kind:'muted'};
+    if(missing) return {text:`확인 필요 ${missing}개`,kind:'warn'};
+    return {text:`${ids.length}/${ids.length} 선택 완료`,kind:'ok'};
+  }
+  function conflictStatus(){
+    const missing=state.conflict.filter(x=>!x).length;
+    if(missing===8) return {text:'미작성',kind:'muted'};
+    if(missing) return {text:`확인 필요 ${missing}개`,kind:'warn'};
+    return {text:'8/8 선택 완료',kind:'ok'};
+  }
+  function pledgeItemHTML(it){
+    const current=state.pledge[it.id]||null;
+    const choices=it.choices.map(c=>`<button type="button" class="choice-btn ${current===c?'active':''} ${c==='na'?'na':''}" data-pledge="${it.id}" data-choice="${c}">${c==='yes'?'예':c==='no'?'아니오':'해당없음'}</button>`).join('');
+    const showExtra=it.extra&&current==='yes';
+    const extra=showExtra?`<div class="extra-choice compact-extra">${it.extra.map(x=>`<button type="button" class="choice-btn ${state.pledge[it.id+'Extra']===x?'active':''}" data-pledge-extra="${it.id}" data-extra="${x}">${x}</button>`).join('')}</div>`:'';
+    return `<div class="pledge-row compact-pledge-row"><div class="pledge-copy"><h4>${it.num}. ${it.title}</h4><p>${esc(pledgeSummaries[it.id]||it.title)}</p></div><div class="pledge-controls"><div class="choice-set">${choices}</div>${extra}</div></div>`;
+  }
+  function pledgeGroupForItem(id){
+    if(['general','private','integrity','tax'].includes(id))return 'basic';
+    if(['guarantee','defect'].includes(id))return 'guarantee';
+    if(['utility','safety','privacy'].includes(id))return 'etc';
+    return null;
+  }
+  function pledgeGroupDone(id){
+    if(id==='conflict')return state.conflict.every(Boolean);
+    const map={basic:['general','private','integrity','tax'],guarantee:['guarantee','defect'],etc:['utility','safety','privacy']};
+    return (map[id]||[]).every(x=>!!state.pledge[x]);
+  }
+  function maybeAdvancePledge(id){
+    const order=['basic','conflict','guarantee','etc'],idx=order.indexOf(id);
+    if(idx>=0&&idx<order.length-1&&pledgeGroupDone(id)&&state.pledgeOpenGroup===id)state.pledgeOpenGroup=order[idx+1];
   }
 
   function renderPledgeSimple(){
-    const root=$('#pledgeSimpleList');
-    root.innerHTML=pledgeItems.map(it=>{
-      const current=state.pledge[it.id]||null;
-      const choices=it.choices.map(c=>`<button type="button" class="choice-btn ${current===c?'active':''} ${c==='na'?'na':''}" data-pledge="${it.id}" data-choice="${c}">${c==='yes'?'예':c==='no'?'아니오':'해당없음'}</button>`).join('');
-      const extra=it.extra?`<div class="extra-choice">${it.extra.map(x=>`<button type="button" class="choice-btn ${state.pledge[it.id+'Extra']===x?'active':''}" data-pledge-extra="${it.id}" data-extra="${x}">${x}</button>`).join('')}</div>`:'';
-      return `<div class="pledge-row"><div class="pledge-copy"><h4>${it.num}. ${it.title}</h4><p>${esc(it.text)}</p></div><div class="pledge-controls"><div class="choice-set">${choices}</div>${extra}</div></div>`;
-    }).join('');
-    $$('[data-pledge]').forEach(b=>b.onclick=()=>{const id=b.dataset.pledge, choice=b.dataset.choice; state.pledge[id]=choice; if((id==='guarantee'||id==='defect')&&choice==='yes'&&!state.pledge[id+'Extra']) state.pledge[id+'Extra']='각서'; if(choice!=='yes'&&(id==='guarantee'||id==='defect')) state.pledge[id+'Extra']=null; renderPledgeSimple();updatePledgeStatus();});
-    $$('[data-pledge-extra]').forEach(b=>b.onclick=()=>{state.pledge[b.dataset.pledgeExtra+'Extra']=b.dataset.extra;renderPledgeSimple();});
-  }
-
-  function renderConflict(){
+    const root=$('#pledgeAccordion'); if(!root) return;
+    const groups=[
+      {id:'basic',title:'① 기본 서약',items:['general','private','integrity','tax']},
+      {id:'conflict',title:'② 수의계약 체결 제한',conflict:true},
+      {id:'guarantee',title:'③ 보증 관련',items:['guarantee','defect']},
+      {id:'etc',title:'④ 기타 확인',items:['utility','safety','privacy']}
+    ];
     const individual=state.businessType==='individual';
-    $('#conflictGuide').textContent=individual?'개인사업자: ①~⑥을 확인하고, ⑦~⑧은 해당없음으로 추천합니다.':'법인사업자: ①~⑥은 해당없음으로 추천하고, ⑦~⑧을 확인합니다.';
-    $('#conflictAllNo').textContent=individual?'①~⑥ 모두 ‘아니오’':'⑦~⑧ 모두 ‘아니오’';
-    $('#conflictList').innerHTML=conflictQuestions.map((q,i)=>{
-      const current=state.conflict[i], auto=(individual&&i>=6)||(!individual&&i<6);
-      return `<div class="conflict-row"><div class="conflict-num">${i+1}</div><div><h4>${esc(q)}${auto?'<span class="auto-badge">사업자유형 추천</span>':''}</h4></div><div class="choice-set">${['yes','no','na'].map(c=>`<button type="button" class="choice-btn ${current===c?'active':''} ${c==='na'?'na':''}" data-conflict="${i}" data-choice="${c}">${c==='yes'?'예':c==='no'?'아니오':'해당없음'}</button>`).join('')}</div></div>`;
+    const conflictGuide=individual?'개인사업자: ①~⑥을 확인하고, ⑦~⑧은 해당없음으로 표시합니다.':'법인사업자: ①~⑥은 해당없음으로 표시하고, ⑦~⑧을 확인합니다.';
+    const conflictButton=individual?'①~⑥ 모두 아니오':'⑦~⑧ 모두 아니오';
+    root.innerHTML=groups.map(g=>{
+      const st=g.conflict?conflictStatus():groupStatus(g.items);
+      const body=g.conflict
+        ? `<div class="flat-group-tools"><p>${esc(conflictGuide)}</p><div><button type="button" class="btn tiny" id="conflictAllNo">${conflictButton}</button><button type="button" class="btn tiny ghost" id="conflictClear">선택 지우기</button></div></div><div class="conflict-list compact-conflict-list" id="conflictList">${conflictQuestions.map((q,i)=>{const current=state.conflict[i],auto=(individual&&i>=6)||(!individual&&i<6);return `<div class="conflict-row compact-conflict-row"><div class="conflict-num">${i+1}</div><div class="conflict-question"><h4>${esc(conflictSummaries[i]||q)}${auto?'<span class="auto-badge">추천</span>':''}</h4></div><div class="choice-set">${['yes','no','na'].map(c=>`<button type="button" class="choice-btn ${current===c?'active':''} ${c==='na'?'na':''}" data-conflict="${i}" data-choice="${c}">${c==='yes'?'예':c==='no'?'아니오':'해당없음'}</button>`).join('')}</div></div>`}).join('')}</div>`
+        : g.items.map(id=>pledgeItemHTML(pledgeItems.find(x=>x.id===id))).join('');
+      return `<section class="pledge-flat-group" data-pledge-group="${g.id}"><div class="pledge-flat-head"><h3>${g.title}</h3><span class="group-status"><span class="dot ${st.kind}"></span>${st.text}</span></div><div class="pledge-group-body">${body}</div></section>`;
     }).join('');
-    $$('[data-conflict]').forEach(b=>b.onclick=()=>{state.conflict[+b.dataset.conflict]=b.dataset.choice;renderConflict();updatePledgeStatus();});
+    $$('[data-pledge]',root).forEach(b=>b.onclick=()=>{const id=b.dataset.pledge,choice=b.dataset.choice;state.pledge[id]=choice;if((id==='guarantee'||id==='defect')&&choice==='yes'&&!state.pledge[id+'Extra'])state.pledge[id+'Extra']='각서';if(choice!=='yes'&&(id==='guarantee'||id==='defect'))state.pledge[id+'Extra']=null;renderPledgeSimple();updatePledgeStatus();scheduleLivePreviews();});
+    $$('[data-pledge-extra]',root).forEach(b=>b.onclick=()=>{state.pledge[b.dataset.pledgeExtra+'Extra']=b.dataset.extra;renderPledgeSimple();scheduleLivePreviews();});
+    $$('[data-conflict]',root).forEach(b=>b.onclick=()=>{state.conflict[+b.dataset.conflict]=b.dataset.choice;renderPledgeSimple();updatePledgeStatus();scheduleLivePreviews();});
+    const allNo=$('#conflictAllNo',root); if(allNo) allNo.onclick=()=>{if(state.businessType==='individual')for(let i=0;i<6;i++)state.conflict[i]='no';else for(let i=6;i<8;i++)state.conflict[i]='no';renderPledgeSimple();updatePledgeStatus();scheduleLivePreviews();};
+    const clear=$('#conflictClear',root); if(clear) clear.onclick=()=>{if(state.businessType==='individual'){for(let i=0;i<6;i++)state.conflict[i]=null;state.conflict[6]='na';state.conflict[7]='na';}else{for(let i=0;i<6;i++)state.conflict[i]='na';for(let i=6;i<8;i++)state.conflict[i]=null;}renderPledgeSimple();updatePledgeStatus();scheduleLivePreviews();};
   }
+  function renderConflict(){renderPledgeSimple();}
 
   function renderSafety(){
-    $('#safetyList').innerHTML=safetyQuestions.map((q,i)=>`<div class="safety-row"><div class="num">${i+1}</div><div><h4>${esc(q)}</h4></div><div class="choice-set">${['yes','no','na'].map(c=>`<button class="choice-btn ${state.safety[i]===c?'active':''} ${c==='na'?'na':''}" type="button" data-safety="${i}" data-choice="${c}">${c==='yes'?'예':c==='no'?'아니요':'해당없음'}</button>`).join('')}</div></div>`).join('');
-    $$('[data-safety]').forEach(b=>b.onclick=()=>{state.safety[+b.dataset.safety]=b.dataset.choice;renderSafety();updateSafetyStatus();});
-    $('#hazardList').innerHTML=hazards.map((h,i)=>`<div class="hazard-item ${state.hazard[i]==='o'?'selected':''}"><span>${h}</span><div class="choice-set"><button class="choice-btn ${state.hazard[i]==='o'?'active':''}" data-hazard="${i}" data-choice="o">○</button><button class="choice-btn ${state.hazard[i]==='x'?'active':''}" data-hazard="${i}" data-choice="x">×</button></div></div>`).join('');
-    $$('[data-hazard]').forEach(b=>b.onclick=()=>{const i=+b.dataset.hazard;state.hazard[i]=b.dataset.choice;if(state.hazard[i]!=='o')state.hazardAnswers[i]=Array(hazardForms[i].questions.length).fill(null);renderSafety();updateSafetyStatus();});
+    $('#safetyList').innerHTML=safetyQuestions.map((q,i)=>`<div class="safety-row"><div class="num">${i+1}</div><div><h4>${esc(safetySummaries[i]||q)}</h4></div><div class="choice-set">${['yes','no','na'].map(c=>`<button class="choice-btn ${state.safety[i]===c?'active':''} ${c==='na'?'na':''}" type="button" data-safety="${i}" data-choice="${c}">${c==='yes'?'예':c==='no'?'아니요':'해당없음'}</button>`).join('')}</div></div>`).join('');
+    $$('[data-safety]').forEach(b=>b.onclick=()=>{state.safety[+b.dataset.safety]=b.dataset.choice;renderSafety();updateSafetyStatus();scheduleLivePreviews();});
+    $('#hazardList').innerHTML=hazards.map((h,i)=>`<div class="hazard-item ${state.hazard[i]==='o'?'selected':''}"><span>${h}</span><div class="choice-set"><button type="button" class="choice-btn ${state.hazard[i]==='o'?'active':''}" data-hazard="${i}" data-choice="o">○</button><button type="button" class="choice-btn ${state.hazard[i]==='x'?'active':''}" data-hazard="${i}" data-choice="x">×</button></div></div>`).join('');
+    $$('[data-hazard]').forEach(b=>b.onclick=()=>{
+      const i=+b.dataset.hazard, beforeY=window.scrollY;
+      state.hazard[i]=b.dataset.choice;
+      if(state.hazard[i]!=='o')state.hazardAnswers[i]=Array(hazardForms[i].questions.length).fill(null);
+      renderSafety();updateSafetyStatus();scheduleLivePreviews();
+      // Re-rendering the detailed checklist must never move the main document.
+      requestAnimationFrame(()=>{if(Math.abs(window.scrollY-beforeY)>2)window.scrollTo({top:beforeY,left:0,behavior:'auto'});});
+    });
     $('#hazardDetailList').innerHTML=hazardForms.map((f,i)=>state.hazard[i]==='o'?`<section class="hazard-detail-card"><div class="hazard-detail-head"><div><span class="pill blue">상세 작성</span><h3>${esc(f.title)}</h3><p>${esc(f.subtitle)}</p></div><button type="button" class="btn tiny ghost hazard-detail-all-yes" data-hazard-all-yes="${i}">모두 예</button></div><div class="hazard-question-list">${f.questions.map((q,j)=>`<div class="hazard-question-row"><div class="num">${j+1}</div><div class="hazard-question-copy">${esc(q)}</div><div class="choice-set">${['yes','no','na'].map(c=>`<button type="button" class="choice-btn ${state.hazardAnswers[i][j]===c?'active':''} ${c==='na'?'na':''}" data-hazard-answer="${i}" data-q="${j}" data-choice="${c}">${c==='yes'?'예':c==='no'?'아니요':'해당없음'}</button>`).join('')}</div></div>`).join('')}</div>${f.note?`<div class="hazard-detail-note">${esc(f.note).replace(/\n/g,'<br>')}</div>`:''}</section>`:'').join('');
-    $$('[data-hazard-answer]').forEach(b=>b.onclick=()=>{state.hazardAnswers[+b.dataset.hazardAnswer][+b.dataset.q]=b.dataset.choice;renderSafety();updateSafetyStatus();});
-    $$('[data-hazard-all-yes]').forEach(b=>b.onclick=()=>{const i=+b.dataset.hazardAllYes;state.hazardAnswers[i]=Array(hazardForms[i].questions.length).fill('yes');renderSafety();updateSafetyStatus();});
+    $$('[data-hazard-answer]').forEach(b=>b.onclick=()=>{state.hazardAnswers[+b.dataset.hazardAnswer][+b.dataset.q]=b.dataset.choice;renderSafety();updateSafetyStatus();scheduleLivePreviews();});
+    $$('[data-hazard-all-yes]').forEach(b=>b.onclick=()=>{const i=+b.dataset.hazardAllYes;state.hazardAnswers[i]=Array(hazardForms[i].questions.length).fill('yes');renderSafety();updateSafetyStatus();scheduleLivePreviews();});
   }
 
+  function updateCompactSummaries(){
+    const contractParts=[typeNames[state.contractType],val('institution'),validDateInput(val('contractDate'))?val('contractDate'):''].filter(Boolean);
+    const c=$('#contractCompactSummary'); if(c)c.textContent=contractParts.length?contractParts.join(' · '):typeNames[state.contractType];
+    const vendorParts=[val('vendorName'),val('representative')?`대표 ${val('representative')}`:'',val('businessNo')].filter(Boolean);
+    const v=$('#vendorCompactSummary'); if(v)v.textContent=vendorParts.length?vendorParts.join(' · '):'미입력';
+  }
   function updateSummaries(){
     const period=getDefectText();
     if(state.contractType==='goods'){
       $('#acceptanceSummary').textContent=`물품 · 지연배상금 ${getRate()}`;
       $('#acceptanceStatus').innerHTML='<span class="dot ok"></span>물품 승낙사항 원본 구조 적용';
-      return;
+    }else{
+      $('#acceptanceSummary').textContent=`${typeNames[state.contractType]} · 지연배상금 ${getRate()} · 하자 ${period||'미입력'}`;
+      const confirmed=$('#defectConfirmed').checked; $('#acceptanceStatus').innerHTML=confirmed?'<span class="dot ok"></span>하자기간 확인됨':'<span class="dot warn"></span>하자기간 확인 필요';
     }
-    $('#acceptanceSummary').textContent=`${typeNames[state.contractType]} · 지연배상금 ${getRate()} · 하자 ${period||'미입력'}`;
-    const confirmed=$('#defectConfirmed').checked; $('#acceptanceStatus').innerHTML=confirmed?'<span class="dot ok"></span>하자기간 확인됨':'<span class="dot warn"></span>하자기간 확인 필요';
+    updateCompactSummaries();
   }
   function updatePledgeStatus(){
     const simpleMissing=pledgeItems.filter(x=>!state.pledge[x.id]).length;
@@ -255,7 +349,7 @@
     ['institution','recipient','contractName','contractDate','startDate','endDate','contractorManager','representativeBirth'].forEach(id=>{const el=$('#'+id);if(el)el.value='';});
     $('#recipient').dataset.userEdited=''; $('#defectPeriod').value='1';$('#customDefect').value='';$('#customDefect').classList.add('hidden');$('#defectConfirmed').checked=false;
     state.customRate=false;$('#customRate').classList.add('hidden');$('#toggleRateEdit').textContent='직접 설정';
-    state.pledge={}; state.conflict=Array(8).fill(null); state.safety=Array(10).fill(null);state.hazard=Array(4).fill(null);state.hazardAnswers=hazardForms.map(f=>Array(f.questions.length).fill(null)); clearSignatures(); setContractType('service'); setBusinessType(state.businessType); renderPledgeSimple();renderConflict();renderSafety();updateSummaries();updatePledgeStatus();updateSafetyStatus();updateConsentUI(); toast('새 계약을 시작했습니다. 저장된 업체정보는 유지됩니다.');
+    state.pledge={}; state.pledgeOpenGroup='basic'; state.conflict=Array(8).fill(null); state.safety=Array(10).fill(null);state.hazard=Array(4).fill(null);state.hazardAnswers=hazardForms.map(f=>Array(f.questions.length).fill(null)); clearSignatures(); setContractType('service'); setBusinessType(state.businessType); renderPledgeSimple();renderConflict();renderSafety();updateSummaries();updatePledgeStatus();updateSafetyStatus();updateConsentUI(); toast('새 계약을 시작했습니다. 저장된 업체정보는 유지됩니다.');
   }
 
   function choiceLabel(v,labels={yes:'예',no:'아니오',na:'해당없음'}){return v?labels[v]||v:'';}
@@ -376,7 +470,7 @@
   }
   function openPreview(docs){
     if(!docs.length){toast('미리볼 서류를 하나 이상 선택해 주세요.');return;}
-    if(docs.includes('safety')){openSignaturePad('contractor',()=>showPreview(docs),true);return;}
+    // 미리보기는 서명 없이 바로 확인한다. 안전·보건 업체 책임자 서명은 실제 인쇄 직전에만 요청한다.
     showPreview(docs);
   }
   function doPrint(docs){$('#printRoot').innerHTML=docs.map(docHTML).join('');setTimeout(()=>window.print(),80);}
@@ -407,26 +501,234 @@
     $('#applySignature').onclick=()=>{state.signatures[state.activeSignSlot]=canvas.toDataURL('image/png');updateSignaturePreviews();dlg.close();if(state.activeSignSlot!=='contractor')toast('서명을 현재 문서에 적용했습니다.');finishPending();};
   }
 
+
+  // v0.2.2 — 목록에서 바로 이어서 작성하고, 오른쪽 한 곳에서 실제 서류를 계속 확인한다.
+  const liveDocMap={acceptance:'acceptanceEditor',pledge:'pledgeEditor',safety:'safetyEditor',consent:'consentEditor'};
+  const editorDocMap=Object.fromEntries(Object.entries(liveDocMap).map(([k,v])=>[v,k]));
+  const liveDocNames={acceptance:'승낙사항',pledge:'수의계약 통합서약서',safety:'안전·보건 체크리스트',consent:'행정정보 공동이용 사전동의서'};
+  let activeLiveDoc='acceptance';
+  let livePreviewTimer=null;
+  let scrollSyncPending=false;
+
+  function applyPreviewBindings(doc,root){
+    if(!root) return;
+    if(doc==='acceptance'){
+      const paras=$$('.doc-paragraph',root);
+      if(paras[0]) paras[0].dataset.bind='startDate endDate';
+      if(paras[2]) paras[2].dataset.bind='delayRateDisplay customRate';
+      if(paras[3]) paras[3].dataset.bind='defectPeriod customDefect defectConfirmed';
+      const date=$('.doc-date',root); if(date) date.dataset.bind='contractDate';
+      $$('.party-info .line',root).forEach(line=>{
+        const label=line.querySelector('span')?.textContent.replace(/\s/g,'')||'';
+        const map={'계약명':'contractName','상호또는법인명칭':'vendorName','법인(사업자)등록번호':'businessNo','전화번호':'phone','주소':'address','대표자':'representative'};
+        if(map[label]) line.dataset.bind=map[label];
+      });
+    }else if(doc==='pledge'){
+      $$('.pledge-meta tr',root).forEach(tr=>{
+        const cells=[...tr.children];
+        for(let i=0;i<cells.length;i++){
+          if(!cells[i].classList.contains('label')) continue;
+          const label=cells[i].textContent.trim(), target=cells[i+1];
+          const map={'계약명':'contractName','발주기관':'institution','업체명':'vendorName','대표자':'representative','사업자등록번호':'businessNo','연락처':'phone','주소':'address'};
+          if(target&&map[label]) target.dataset.bind=map[label];
+        }
+      });
+      $$('.pledge-table tbody tr',root).forEach(tr=>{const n=tr.querySelector('.num')?.textContent.trim();if(n)tr.dataset.bind='pledge-'+n;});
+      const footer=$('.pledge-footer',root);if(footer)footer.dataset.bind='contractDate';
+      const sign=$('.pledge-sign',root);if(sign)sign.dataset.bind='representative vendorName';
+      const recipient=$('.recipient-line',root);if(recipient)recipient.dataset.bind='recipient';
+    }else if(doc==='safety'){
+      const meta=$$('.safety-meta .mrow',root); if(meta[0])meta[0].dataset.bind='institution';
+      $$('.safety-table tbody tr',root).forEach((tr,i)=>tr.dataset.bind='safety-'+i);
+      $$('.hazard-print tr',root).slice(1,5).forEach((tr,i)=>tr.dataset.bind='hazard-'+i);
+      const sign=$('.safety-sign',root);if(sign)sign.dataset.bind='contractorManager contractor-sign';
+    }else if(doc==='consent'){
+      $$('.consent-table tr',root).forEach(tr=>{
+        const label=tr.querySelector('th')?.textContent.replace(/\s/g,'')||'';
+        if(label.includes('이용기관명칭'))tr.dataset.bind='institution';
+        if(label.includes('제공하는정보'))tr.dataset.bind='businessNo';
+      });
+      const person=$$('.consent-person > div',root);if(person[0])person[0].dataset.bind='representative representative-sign';if(person[1])person[1].dataset.bind='representativeBirth';if(person[2])person[2].dataset.bind='phone';
+      const date=$('.consent-date',root);if(date)date.dataset.bind='contractDate';
+      const recipient=$('.consent-recipient',root);if(recipient)recipient.dataset.bind='recipient';
+      $$('.consent-id-line',root).forEach(x=>x.dataset.bind='businessNo');
+    }
+  }
+
+  function renderLivePreview(doc=activeLiveDoc){
+    const stage=$('#sharedPreviewStage'); if(!stage) return;
+    activeLiveDoc=doc||activeLiveDoc;
+    stage.innerHTML=docHTML(activeLiveDoc);
+    applyPreviewBindings(activeLiveDoc,stage);
+    const title=$('#sharedPreviewTitle'); if(title) title.textContent=liveDocNames[activeLiveDoc];
+    const meta=$('#sharedPreviewMeta'); if(meta) meta.textContent='입력 즉시 반영';
+    const picker=$('#previewDocSelect'); if(picker&&picker.value!==activeLiveDoc) picker.value=activeLiveDoc;
+    const current=$('#printbarCurrentDoc'); if(current) current.textContent=liveDocNames[activeLiveDoc];
+    $$('.inline-doc-section').forEach(x=>x.classList.toggle('is-active',x.dataset.doc===activeLiveDoc));
+  }
+  function refreshLivePreviews(){renderLivePreview(activeLiveDoc);}
+  function scheduleLivePreviews(){clearTimeout(livePreviewTimer);livePreviewTimer=setTimeout(()=>renderLivePreview(activeLiveDoc),25);}
+
+  function setActiveLiveDoc(doc,{scrollPreview=false}={}){
+    if(!liveDocMap[doc]) return;
+    const changed=activeLiveDoc!==doc;
+    activeLiveDoc=doc;
+    renderLivePreview(doc);
+    if(changed&&scrollPreview){$('#sharedPreviewPane')?.scrollIntoView({behavior:'smooth',block:'start'});}
+  }
+
+  function highlightLiveBinding(editor,token){
+    if(!token)return;
+    const stage=$('#sharedPreviewStage');if(!stage)return;
+    $$('.live-highlight',stage).forEach(x=>x.classList.remove('live-highlight'));
+    const match=$$('[data-bind]',stage).find(x=>(x.dataset.bind||'').split(/\s+/).includes(token));
+    if(match){
+      match.classList.add('live-highlight');
+      // Keep the main page position fixed. Only scroll the document preview pane.
+      const stageBox=stage.getBoundingClientRect(), matchBox=match.getBoundingClientRect();
+      const targetTop=stage.scrollTop+(matchBox.top-stageBox.top)-stage.clientHeight/2+matchBox.height/2;
+      stage.scrollTo({top:Math.max(0,targetTop),behavior:'smooth'});
+      setTimeout(()=>match.classList.remove('live-highlight'),1500);
+    }
+  }
+  function tokenForControl(target){
+    if(target.id) return target.id;
+    if(target.dataset.pledge){const item=pledgeItems.find(x=>x.id===target.dataset.pledge);return item?'pledge-'+item.num:'';}
+    if(target.dataset.conflict!==undefined)return 'pledge-3';
+    if(target.dataset.safety!==undefined)return 'safety-'+target.dataset.safety;
+    if(target.dataset.hazard!==undefined)return 'hazard-'+target.dataset.hazard;
+    return '';
+  }
+
+  function focusInputForBinding(token){
+    let field=$('#'+token);
+    if(!field&&token.startsWith('pledge-')){
+      const num=token.slice(7);
+      if(num==='3')field=$('[data-conflict]');
+      else{const item=pledgeItems.find(x=>x.num===num);if(item)field=$(`[data-pledge="${item.id}"]`);}
+    }
+    if(!field&&token.startsWith('safety-'))field=$(`[data-safety="${token.slice(7)}"]`);
+    if(!field&&token.startsWith('hazard-'))field=$(`[data-hazard="${token.slice(7)}"]`);
+    if(field){field.focus?.();field.scrollIntoView({behavior:'smooth',block:'center'});return true;}
+    return false;
+  }
+
+  function updateSelectedCount(){
+    const docs=selectedDocs();
+    const count=docs.length;
+    const el=$('#selectedDocCount');if(el)el.textContent=`선택 ${count}종`;
+    $$('.inline-doc-section').forEach(sec=>sec.classList.toggle('doc-unselected',!docs.includes(sec.dataset.doc)));
+    $$('.doc-choice-chip').forEach(chip=>chip.classList.toggle('is-selected',docs.includes(chip.dataset.doc)));
+    if(!docs.includes(activeLiveDoc)) setActiveLiveDoc(docs[0]||'acceptance');
+  }
+
+  function syncPreviewToScroll(){
+    if(scrollSyncPending)return;scrollSyncPending=true;
+    requestAnimationFrame(()=>{
+      scrollSyncPending=false;
+      const sections=$$('.inline-doc-section');if(!sections.length)return;
+      const targetY=Math.min(window.innerHeight*.34,240);
+      let best=null,bestDist=Infinity;
+      sections.forEach(sec=>{
+        const r=sec.getBoundingClientRect();
+        if(r.bottom<90||r.top>window.innerHeight*.92)return;
+        const d=Math.abs(r.top-targetY);
+        if(d<bestDist){best=sec;bestDist=d;}
+      });
+      if(best&&best.dataset.doc!==activeLiveDoc)setActiveLiveDoc(best.dataset.doc);
+    });
+  }
+
+  function initInlineWorkbench(){
+    const workspace=$('.workspace'),docList=$('#docList');if(!workspace||!docList)return;
+    const footer=$('.app-footer');
+    const hero=$('.compact-hero'); if(hero) hero.remove();
+    const composer=document.createElement('div');composer.className='v023-workbench';
+    const preview=document.createElement('aside');preview.className='shared-preview-pane v023-preview-pane';preview.id='sharedPreviewPane';
+    preview.innerHTML=`<div class="shared-preview-shell"><div class="shared-preview-head"><div><span class="eyebrow">현재 서류</span><h3 id="sharedPreviewTitle">승낙사항</h3><p id="sharedPreviewMeta">입력 즉시 반영</p></div><div class="shared-preview-actions"><select id="previewDocSelect" class="preview-doc-select" aria-label="미리보기 문서 선택"><option value="acceptance">01 승낙사항</option><option value="pledge">02 수의계약 통합서약서</option><option value="safety">03 안전·보건 체크리스트</option><option value="consent">04 행정정보 공동이용 사전동의서</option></select><button type="button" class="btn tiny ghost" id="sharedPreviewFullscreen">크게 보기</button></div></div><div class="live-preview-stage" id="sharedPreviewStage" aria-label="실시간 서류 미리보기"></div></div>`;
+    const flow=document.createElement('div');flow.className='v023-flow-column';
+    const selector=document.createElement('section');selector.className='doc-choice-bar';
+    selector.innerHTML=`<div class="doc-choice-head"><div><span class="eyebrow">작성할 서류</span><strong>필요한 서류만 선택하세요</strong></div><span id="selectedDocCount">선택 4종</span></div><div class="doc-choice-list" id="docChoiceList"></div>`;
+    flow.appendChild(selector); const choiceList=$('#docChoiceList',selector);
+    $$('.doc-list-row',docList).forEach(row=>{
+      const doc=row.dataset.doc,id=liveDocMap[doc],editor=$('#'+id);if(!editor)return;
+      const checkbox=row.querySelector('input[type="checkbox"]');
+      const title=row.querySelector('h3')?.textContent||liveDocNames[doc];
+      const num=row.querySelector('.doc-list-num')?.textContent||'';
+      const status=row.querySelector('.status-line');
+      const desc=row.querySelector('.doc-list-copy p')?.textContent||'';
+      const chip=document.createElement('label');chip.className='doc-choice-chip';chip.dataset.doc=doc;
+      chip.innerHTML=`<span class="chip-checkbox-slot"></span><span class="chip-num">${num}</span><span class="chip-copy"><strong>${esc(title)}</strong><small>${esc(desc)}</small></span>`;
+      chip.querySelector('.chip-checkbox-slot').appendChild(checkbox); choiceList.appendChild(chip);
+      const section=document.createElement('section');section.className='inline-doc-section v023-doc-section';section.dataset.doc=doc;
+      const head=document.createElement('div');head.className='v023-section-head';
+      head.innerHTML=`<div class="v023-title-wrap"><span class="v023-doc-num">${num}</span><div><h2>${esc(title)}</h2><p>${esc(desc)}</p></div></div><div class="v023-status-slot"></div>`;
+      if(status) head.querySelector('.v023-status-slot').appendChild(status);
+      editor.classList.remove('collapsed','doc-hidden','doc-active');editor.classList.add('inline-editor');
+      const oldHead=$('.editor-head',editor);if(oldHead)oldHead.setAttribute('aria-hidden','true');
+      section.append(head,editor);flow.appendChild(section);
+      const activate=()=>setActiveLiveDoc(doc); section.addEventListener('pointerenter',activate,{passive:true}); section.addEventListener('focusin',activate); head.addEventListener('click',activate);
+      checkbox.addEventListener('change',()=>{updateSelectedCount();scheduleLivePreviews();});
+    });
+    docList.remove();
+    const signature=$('.signature-card');if(signature){signature.classList.add('inline-signature','v023-signature');flow.appendChild(signature);}
+    const bottom=document.createElement('div');bottom.className='flow-printbar v023-printbar';bottom.innerHTML=`<div class="printbar-current"><span>현재 서류</span><strong id="printbarCurrentDoc">승낙사항</strong></div><div><button type="button" class="btn ghost" id="flowPreviewAll">선택 서류 미리보기</button><button type="button" class="btn primary" id="flowPrintCurrent">현재 서류 인쇄</button><button type="button" class="btn dark" id="flowPrintAll">선택 서류 한 번에 출력</button></div>`; flow.appendChild(bottom);
+    composer.append(preview,flow); if(footer)workspace.insertBefore(composer,footer);else workspace.appendChild(composer);
+    $('#sharedPreviewFullscreen').onclick=()=>openPreview([activeLiveDoc]); $('#flowPrintCurrent').onclick=()=>printDocs([activeLiveDoc]); $('#flowPreviewAll').onclick=()=>openPreview(selectedDocs()); $('#flowPrintAll').onclick=()=>printDocs(selectedDocs());
+    $('#previewDocSelect').onchange=e=>setActiveLiveDoc(e.target.value);
+    preview.querySelector('.live-preview-stage').addEventListener('click',e=>{const bound=e.target.closest('[data-bind]');if(!bound)return;for(const token of (bound.dataset.bind||'').split(/\s+/)){if(focusInputForBinding(token))break;}});
+    updateSelectedCount();setActiveLiveDoc('acceptance'); window.addEventListener('scroll',syncPreviewToScroll,{passive:true});
+  }
+
+  function initLiveEditors(){
+    initInlineWorkbench();
+    const heroText=$('.compact-hero p:last-child');if(heroText)heroText.textContent='아래에서 필요한 항목만 바로 작성하세요. 오른쪽 실제 서류에 즉시 반영됩니다.';
+    const heroButton=$('#previewSelectedBtn');if(heroButton)heroButton.textContent='선택 서류 한 번에 보기';
+    document.addEventListener('input',e=>{if(e.target.closest('.app-shell'))scheduleLivePreviews();});
+    document.addEventListener('change',e=>{if(e.target.closest('.app-shell'))scheduleLivePreviews();});
+    document.addEventListener('focusin',e=>{
+      const editor=e.target.closest('.editor-card');if(!editor)return;
+      const doc=editorDocMap[editor.id];if(doc)setActiveLiveDoc(doc);
+      highlightLiveBinding(editor,tokenForControl(e.target));
+    });
+    document.addEventListener('click',e=>{
+      const editor=e.target.closest('.editor-card');if(!editor)return;
+      const doc=editorDocMap[editor.id];if(doc)setActiveLiveDoc(doc);
+      setTimeout(()=>{scheduleLivePreviews();highlightLiveBinding(editor,tokenForControl(e.target));},0);
+    });
+    refreshLivePreviews();
+  }
+
+  function setupDateInputs(){
+    ['contractDate','startDate','endDate'].forEach(id=>{
+      const input=$('#'+id),picker=$(`[data-picker-for="${id}"]`),button=$(`[data-date-for="${id}"]`); if(!input)return;
+      input.addEventListener('input',()=>{input.value=formatDateInput(input.value);input.classList.remove('invalid');updateSummaries();scheduleLivePreviews();});
+      input.addEventListener('blur',()=>{const ok=validDateInput(input.value);input.classList.toggle('invalid',!ok);input.setAttribute('aria-invalid',ok?'false':'true');input.title=ok?'':'YYYY-MM-DD 형식의 실제 날짜를 입력해 주세요.';});
+      if(picker){picker.addEventListener('change',()=>{if(picker.value){input.value=picker.value;input.classList.remove('invalid');updateSummaries();scheduleLivePreviews();}});}
+      if(button&&picker)button.addEventListener('click',()=>{if(validDateInput(input.value)&&/^\d{4}-\d{2}-\d{2}$/.test(input.value))picker.value=input.value;try{picker.showPicker();}catch(e){picker.focus();picker.click();}});
+    });
+  }
+
   // events
   $$('#contractTypeGroup button').forEach(b=>b.onclick=()=>setContractType(b.dataset.type));
   $$('#businessTypeGroup button').forEach(b=>b.onclick=()=>setBusinessType(b.dataset.business));
-  $('#institution').addEventListener('input',()=>{maybeSuggestRecipient(false);updateConsentUI()});$('#institution').addEventListener('blur',()=>maybeSuggestRecipient(false));$('#recipient').addEventListener('input',()=>{$('#recipient').dataset.userEdited='1'});$('#suggestRecipientBtn').onclick=()=>maybeSuggestRecipient(true);
+  $('#institution').addEventListener('input',()=>{maybeSuggestRecipient(false);updateConsentUI();updateCompactSummaries()});$('#institution').addEventListener('blur',()=>maybeSuggestRecipient(false));$('#recipient').addEventListener('input',()=>{$('#recipient').dataset.userEdited='1'});$('#suggestRecipientBtn').onclick=()=>maybeSuggestRecipient(true);
   $('#defectPeriod').onchange=()=>{$('#customDefect').classList.toggle('hidden',$('#defectPeriod').value!=='custom');$('#defectConfirmed').checked=false;updateSummaries();};$('#customDefect').oninput=updateSummaries;$('#defectConfirmed').onchange=updateSummaries;
   $('#toggleRateEdit').onclick=()=>{state.customRate=!state.customRate;$('#customRate').classList.toggle('hidden',!state.customRate);$('#toggleRateEdit').textContent=state.customRate?'법정값으로':'직접 설정';if(!state.customRate)$('#customRate').value='';updateSummaries();};$('#customRate').oninput=updateSummaries;
-  ['vendorName','representative','phone','address'].forEach(id=>$('#'+id).addEventListener('input',()=>{saveVendorIfEnabled();updateConsentUI();}));
-  $('#businessNo').addEventListener('input',e=>{e.target.value=formatBusinessNo(e.target.value);saveVendorIfEnabled();updateConsentUI();});
-  $('#representativeBirth').addEventListener('input',e=>{const raw=e.target.value; e.target.value=formatBirthInput(raw); updateConsentUI();});
+  ['vendorName','representative','phone','address'].forEach(id=>$('#'+id).addEventListener('input',()=>{saveVendorIfEnabled();updateConsentUI();updateCompactSummaries();}));
+  $('#businessNo').addEventListener('input',e=>{e.target.value=formatBusinessNo(e.target.value);saveVendorIfEnabled();updateConsentUI();updateCompactSummaries();});
+  $('#representativeBirth').addEventListener('input',e=>{const raw=e.target.value; e.target.value=formatBirthInput(raw);e.target.classList.remove('invalid'); updateConsentUI();});$('#representativeBirth').addEventListener('blur',e=>{const ok=validDateInput(e.target.value);e.target.classList.toggle('invalid',!ok);e.target.setAttribute('aria-invalid',ok?'false':'true');});
   $('#rememberVendor').onchange=()=>{if($('#rememberVendor').checked){saveVendorIfEnabled();toast('업체정보를 이 브라우저에 저장합니다.');}else{localStorage.removeItem(STORE_KEY);$('#saveState').textContent='업체정보 미저장';}};$('#deleteSavedVendorBtn').onclick=()=>deleteSavedVendor(false);
-  $('#pledgeAllYes').onclick=()=>{pledgeItems.forEach(it=>{if(it.id==='utility'&&state.contractType!=='construction')return;state.pledge[it.id]='yes';if((it.id==='guarantee'||it.id==='defect')&&!state.pledge[it.id+'Extra'])state.pledge[it.id+'Extra']='각서';});if(state.contractType!=='construction')state.pledge.utility='na';renderPledgeSimple();updatePledgeStatus();};$('#pledgeClear').onclick=()=>{state.pledge={};if(state.contractType!=='construction')state.pledge.utility='na';renderPledgeSimple();updatePledgeStatus();};$('#conflictAllNo').onclick=()=>{if(state.businessType==='individual')for(let i=0;i<6;i++)state.conflict[i]='no';else for(let i=6;i<8;i++)state.conflict[i]='no';renderConflict();updatePledgeStatus();};
-  $$('.safety-bulk').forEach(b=>b.onclick=()=>{state.safety=Array(10).fill(b.dataset.value);renderSafety();updateSafetyStatus();});$('#safetyClear').onclick=()=>{state.safety=Array(10).fill(null);renderSafety();updateSafetyStatus();};
+  $('#pledgeAllYes').onclick=()=>{pledgeItems.forEach(it=>{if(it.id==='utility'&&state.contractType!=='construction')return;state.pledge[it.id]='yes';if((it.id==='guarantee'||it.id==='defect')&&!state.pledge[it.id+'Extra'])state.pledge[it.id+'Extra']='각서';});if(state.contractType!=='construction')state.pledge.utility='na';renderPledgeSimple();updatePledgeStatus();};$('#pledgeClear').onclick=()=>{state.pledge={};if(state.contractType!=='construction')state.pledge.utility='na';renderPledgeSimple();updatePledgeStatus();};
+  $$('.safety-bulk').forEach(b=>b.onclick=()=>{state.safety=Array(10).fill(b.dataset.value);renderSafety();updateSafetyStatus();scheduleLivePreviews();});$('#safetyClear').onclick=()=>{state.safety=Array(10).fill(null);renderSafety();updateSafetyStatus();};
   $('#hazardAllNo').onclick=()=>{state.hazard=Array(4).fill('x');state.hazardAnswers=hazardForms.map(f=>Array(f.questions.length).fill(null));renderSafety();updateSafetyStatus();};
-  $$('.open-editor').forEach(b=>b.onclick=()=>{const el=$('#'+b.dataset.target);el.classList.remove('collapsed');el.scrollIntoView({behavior:'smooth',block:'start'})});$$('.collapse-btn').forEach(b=>b.onclick=()=>b.closest('.editor-card').classList.toggle('collapsed'));
-  $$('.preview-one').forEach(b=>b.onclick=()=>openPreview([b.dataset.doc]));$$('.print-one').forEach(b=>b.onclick=()=>printDocs([b.dataset.doc]));$('#previewSelectedBtn').onclick=()=>openPreview(selectedDocs());$('#closePreview').onclick=()=>{const hadSafety=state.previewDocs.includes('safety');$('#previewDialog').close();if(hadSafety)state.signatures.contractor=null;$('#previewCanvas').innerHTML='';};$('#printPreview').onclick=()=>printDocs(state.previewDocs,true);
+  $$('.collapse-btn').forEach(b=>b.onclick=()=>b.closest('.editor-card').classList.toggle('collapsed'));
+  $$('.preview-one').forEach(b=>b.onclick=()=>openPreview([b.dataset.doc]));$$('.print-one').forEach(b=>b.onclick=()=>printDocs([b.dataset.doc]));$('#previewSelectedBtn').onclick=()=>openPreview(selectedDocs());$('#closePreview').onclick=()=>{const hadSafety=state.previewDocs.includes('safety');$('#previewDialog').close();if(hadSafety)state.signatures.contractor=null;$('#previewCanvas').innerHTML='';};$('#printPreview').onclick=()=>{const docs=[...state.previewDocs];$('#previewDialog').close();printDocs(docs,false);};
   $('#newContractBtn').onclick=()=>$('#newContractDialog').showModal();$('#cancelNewContract').onclick=()=>$('#newContractDialog').close();$('#confirmNewContract').onclick=()=>{$('#newContractDialog').close();newContract();};$('#helpBtn').onclick=()=>$('#helpDialog').showModal();$('#closeHelp').onclick=()=>$('#helpDialog').close();$('#fullResetBtn').onclick=()=>{deleteSavedVendor(true);newContract();$('#helpDialog').close();};
   $('#sealFile').onchange=e=>{const file=e.target.files?.[0];if(!file)return;revokeSeal();state.sealObjectUrl=URL.createObjectURL(file);state.signatures.representative=state.sealObjectUrl;updateSignaturePreviews();e.target.value='';toast('직인을 현재 탭에만 적용했습니다.');};$$('.clear-sign').forEach(b=>b.onclick=()=>{if(b.dataset.slot==='representative')revokeSeal();state.signatures[b.dataset.slot]=null;updateSignaturePreviews();});
   window.addEventListener('beforeunload',revokeSeal);
   window.addEventListener('afterprint',()=>{state.signatures.contractor=null;$('#printRoot').innerHTML='';if($('#previewDialog').open&&state.previewDocs.includes('safety'))$('#previewCanvas').innerHTML=state.previewDocs.map(docHTML).join('');});
-  ['contractName','contractDate','startDate','endDate'].forEach(id=>$('#'+id).addEventListener('input',updateSummaries));
+  $('#contractName').addEventListener('input',updateSummaries);
 
-  setupSignaturePad(); loadVendor(); setContractType('service'); setBusinessType(state.businessType); renderPledgeSimple();renderConflict();renderSafety();updateSummaries();updatePledgeStatus();updateSafetyStatus();updateSignaturePreviews();updateConsentUI();
+  setupSignaturePad(); setupDateInputs(); loadVendor(); setContractType('service'); setBusinessType(state.businessType); renderPledgeSimple();renderConflict();renderSafety();updateSummaries();updatePledgeStatus();updateSafetyStatus();updateSignaturePreviews();updateConsentUI(); initLiveEditors();
 })();
