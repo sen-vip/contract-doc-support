@@ -371,13 +371,13 @@ input.invalid{border-color:#d76d6d!important;background:#fffafa!important}
 
 /* Acceptance: pixel-aligned confirmation row */
 .v023-doc-section[data-doc="acceptance"] .confirm-chip{
-  display:grid;
-  grid-template-columns:16px minmax(0,1fr);
+  display:flex;
   align-items:center;
-  justify-content:start;
-  column-gap:9px;
+  justify-content:flex-start;
+  gap:10px;
+  width:100%;
   padding:0 14px;
-  line-height:1;
+  line-height:1.2;
 }
 .v023-doc-section[data-doc="acceptance"] .confirm-chip input[type="checkbox"]{
   width:16px;
@@ -385,17 +385,19 @@ input.invalid{border-color:#d76d6d!important;background:#fffafa!important}
   min-width:16px;
   margin:0;
   padding:0;
+  flex:0 0 16px;
   align-self:center;
-  justify-self:start;
   vertical-align:middle;
 }
 .v023-doc-section[data-doc="acceptance"] .confirm-chip span{
   display:flex;
   align-items:center;
-  min-height:18px;
+  flex:1 1 auto;
+  min-height:100%;
   margin:0;
   padding:0;
-  line-height:18px;
+  line-height:1.2;
+  transform:translateY(-1px);
 }
 
 

@@ -232,7 +232,7 @@
   }
   function pledgeItemHTML(it){
     const current=state.pledge[it.id]||null;
-    const choices=it.choices.map(c=>`<button type="button" class="choice-btn ${current===c?'active':''} ${c==='na'?'na':''}" data-pledge="${it.id}" data-choice="${c}">${c==='yes'?'예':c==='no'?'아니오':'해당없음'}</button>`).join('');
+    const choices=it.choices.map(c=>`<button type="button" class="choice-btn ${current===c?'active':''} ${c==='na'?'na':''}" data-pledge="${it.id}" data-choice="${c}">${c==='yes'?'예':c==='no'?'아니요':'해당없음'}</button>`).join('');
     const showExtra=it.extra&&current==='yes';
     const extra=showExtra?`<div class="extra-choice compact-extra">${it.extra.map(x=>`<button type="button" class="choice-btn ${state.pledge[it.id+'Extra']===x?'active':''}" data-pledge-extra="${it.id}" data-extra="${x}">${x}</button>`).join('')}</div>`:'';
     return `<div class="pledge-row compact-pledge-row"><div class="pledge-copy"><h4>${it.num}. ${it.title}</h4><p>${esc(pledgeSummaries[it.id]||it.title)}</p></div><div class="pledge-controls"><div class="choice-set">${choices}</div>${extra}</div></div>`;
@@ -263,11 +263,11 @@
     ];
     const individual=state.businessType==='individual';
     const conflictGuide=individual?'개인사업자: ①~⑥을 확인하고, ⑦~⑧은 해당없음으로 표시합니다.':'법인사업자: ①~⑥은 해당없음으로 표시하고, ⑦~⑧을 확인합니다.';
-    const conflictButton=individual?'①~⑥ 모두 아니오':'⑦~⑧ 모두 아니오';
+    const conflictButton=individual?'①~⑥ 모두 아니요':'⑦~⑧ 모두 아니요';
     root.innerHTML=groups.map(g=>{
       const st=g.conflict?conflictStatus():groupStatus(g.items);
       const body=g.conflict
-        ? `<div class="flat-group-tools"><p>${esc(conflictGuide)}</p><div><button type="button" class="btn tiny" id="conflictAllNo">${conflictButton}</button><button type="button" class="btn tiny ghost" id="conflictClear">선택 지우기</button></div></div><div class="conflict-list compact-conflict-list" id="conflictList">${conflictQuestions.map((q,i)=>{const current=state.conflict[i],auto=(individual&&i>=6)||(!individual&&i<6);return `<div class="conflict-row compact-conflict-row"><div class="conflict-num">${i+1}</div><div class="conflict-question"><h4>${esc(conflictSummaries[i]||q)}${auto?'<span class="auto-badge">추천</span>':''}</h4></div><div class="choice-set">${['yes','no','na'].map(c=>`<button type="button" class="choice-btn ${current===c?'active':''} ${c==='na'?'na':''}" data-conflict="${i}" data-choice="${c}">${c==='yes'?'예':c==='no'?'아니오':'해당없음'}</button>`).join('')}</div></div>`}).join('')}</div>`
+        ? `<div class="flat-group-tools"><p>${esc(conflictGuide)}</p><div><button type="button" class="btn tiny" id="conflictAllNo">${conflictButton}</button><button type="button" class="btn tiny ghost" id="conflictClear">선택 지우기</button></div></div><div class="conflict-list compact-conflict-list" id="conflictList">${conflictQuestions.map((q,i)=>{const current=state.conflict[i],auto=(individual&&i>=6)||(!individual&&i<6);return `<div class="conflict-row compact-conflict-row"><div class="conflict-num">${i+1}</div><div class="conflict-question"><h4>${esc(conflictSummaries[i]||q)}${auto?'<span class="auto-badge">추천</span>':''}</h4></div><div class="choice-set">${['yes','no','na'].map(c=>`<button type="button" class="choice-btn ${current===c?'active':''} ${c==='na'?'na':''}" data-conflict="${i}" data-choice="${c}">${c==='yes'?'예':c==='no'?'아니요':'해당없음'}</button>`).join('')}</div></div>`}).join('')}</div>`
         : g.items.map(id=>pledgeItemHTML(pledgeItems.find(x=>x.id===id))).join('');
       return `<section class="pledge-flat-group" data-pledge-group="${g.id}"><div class="pledge-flat-head"><h3>${g.title}</h3><span class="group-status"><span class="dot ${st.kind}"></span>${st.text}</span></div><div class="pledge-group-body">${body}</div></section>`;
     }).join('');
@@ -352,7 +352,7 @@
     state.pledge={}; state.pledgeOpenGroup='basic'; state.conflict=Array(8).fill(null); state.safety=Array(10).fill(null);state.hazard=Array(4).fill(null);state.hazardAnswers=hazardForms.map(f=>Array(f.questions.length).fill(null)); clearSignatures(); setContractType('service'); setBusinessType(state.businessType); renderPledgeSimple();renderConflict();renderSafety();updateSummaries();updatePledgeStatus();updateSafetyStatus();updateConsentUI(); toast('새 계약을 시작했습니다. 저장된 업체정보는 유지됩니다.');
   }
 
-  function choiceLabel(v,labels={yes:'예',no:'아니오',na:'해당없음'}){return v?labels[v]||v:'';}
+  function choiceLabel(v,labels={yes:'예',no:'아니요',na:'해당없음'}){return v?labels[v]||v:'';}
   function sigImg(slot,cls='sig-img'){const src=state.signatures[slot];return src?`<img class="${cls}" src="${src}" alt="서명 또는 직인">`:'';}
 
   function acceptanceHTML(){
@@ -374,9 +374,9 @@
 
   function pledgeChoice(it){return state.pledge[it.id]||null;}
   function pledgeHTML(){
-    const conflictHtml=conflictQuestions.map((q,i)=>`<div class="conflict-sub"><strong>${i+1}.</strong> ${esc(q)}<br>${box('yes',state.conflict[i],'예')}${box('no',state.conflict[i],'아니오')}${box('na',state.conflict[i],'해당없음')}</div>`).join('');
+    const conflictHtml=conflictQuestions.map((q,i)=>`<div class="conflict-sub"><strong>${i+1}.</strong> ${esc(q)}<br>${box('yes',state.conflict[i],'예')}${box('no',state.conflict[i],'아니요')}${box('na',state.conflict[i],'해당없음')}</div>`).join('');
     const rows=pledgeItems.map(it=>{
-      const c=pledgeChoice(it); let choices=it.choices.length===3?`${box('yes',c,'예')}${box('no',c,'아니오')}<br>${box('na',c,'해당없음')}`:it.choices.map(x=>box(x,c,x==='yes'?'예':x==='no'?'아니오':'해당없음')).join('');
+      const c=pledgeChoice(it); let choices=it.choices.length===3?`${box('yes',c,'예')}${box('no',c,'아니요')}<br>${box('na',c,'해당없음')}`:it.choices.map(x=>box(x,c,x==='yes'?'예':x==='no'?'아니요':'해당없음')).join('');
       if(it.extra){const ex=state.pledge[it.id+'Extra'];choices+=`<br>${box(it.extra[0],ex,it.extra[0])}${box(it.extra[1],ex,it.extra[1])}`;}
       return `<tr><td class="num">${it.num}</td><td class="cat">${esc(it.title)}</td><td>${esc(it.text)}</td><td class="choices">${choices}</td></tr>`;
     });
